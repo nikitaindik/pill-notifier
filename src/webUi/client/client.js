@@ -2,7 +2,7 @@ const ledElement = document.querySelector('.led');
 const buttonElement = document.querySelector('button');
 const recordsContainerElement = document.querySelector('.records-container');
 
-const socket = new WebSocket('ws://localhost:3011');
+const socket = new WebSocket('ws://{{WEB_UI_SERVER_ADDRESS}}:3011');
 
 socket.addEventListener('message', function (event) {
   const parsedMessage = JSON.parse(event.data);

@@ -1,9 +1,9 @@
 const mqtt = require('mqtt');
 
-const MQTT_SERVER_IP = 'mqtt://192.168.1.12';
+const MQTT_BROKER_URL = 'mqtt://' + process.env.MQTT_BROKER_ADDRESS;
 
 function connect(clientName) {
-  const originalClient = mqtt.connect(MQTT_SERVER_IP);
+  const originalClient = mqtt.connect(MQTT_BROKER_URL);
 
   const enhancedClient = Object.create(originalClient);
 
@@ -14,20 +14,28 @@ function connect(clientName) {
 
   enhancedClient.on = (...args) => {
     if (args[0] === 'connect') {
-      console.log(`[${clientName}] Connected to MQTT server at:`, MQTT_SERVER_IP);
+      const [type, originalOnConnect, ...otherArgs] = args;
+      const enhancedOnConnect = (connack) => {
+        console.log(`[${clientName}] Connected to MQTT broker at:`, MQTT_BROKER_URL);
+
+        originalOnConnect(connack);
+      };
+
+      originalClient.on(type, enhancedOnConnect, ...otherArgs);
+      return;
     }
 
     if (args[0] === 'message') {
-      const [type, originalCallback, ...otherArgs] = args;
-      const enhancedCallback = (topic, messageBuffer) => {
+      const [type, originalOnMessage, ...otherArgs] = args;
+      const enhancedOnMessage = (topic, messageBuffer) => {
         const stringifiedMessage = messageBuffer.toString();
 
         console.log(`[${clientName}] Received MQTT message:`, { topic, message: stringifiedMessage });
 
-        originalCallback(topic, stringifiedMessage);
+        originalOnMessage(topic, stringifiedMessage);
       };
 
-      originalClient.on(type, enhancedCallback, ...args);
+      originalClient.on(type, enhancedOnMessage, ...otherArgs);
       return;
     }
 
