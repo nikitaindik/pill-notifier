@@ -1,11 +1,14 @@
 const fs = require('fs');
+const path = require('path');
+
+const FAKE_DB_FILENAME = path.resolve(__dirname, 'db.csv');
 
 function createPillTakeRecord() {
   return new Promise((resolve) => {
     const record = makeRecord();
     const stringifiedRecord = JSON.stringify(record);
 
-    fs.appendFile('db.csv', `${stringifiedRecord},\n`, (error) => {
+    fs.appendFile(FAKE_DB_FILENAME, `${stringifiedRecord},\n`, (error) => {
       if (error) {
         throw error;
       }
@@ -33,7 +36,7 @@ function writeAllRecords(records) {
   }
 
   return new Promise((resolve) => {
-    fs.writeFile('db.csv', fileContent, 'utf8', () => {
+    fs.writeFile(FAKE_DB_FILENAME, fileContent, 'utf8', () => {
       resolve();
     });
   });
@@ -54,7 +57,7 @@ async function checkIfPillTakenToday() {
 
 function readRecords() {
   return new Promise((resolve) => {
-    fs.readFile('db.csv', 'utf8', (error, fileContent) => {
+    fs.readFile(FAKE_DB_FILENAME, 'utf8', (error, fileContent) => {
       if (error) {
         throw error;
       }

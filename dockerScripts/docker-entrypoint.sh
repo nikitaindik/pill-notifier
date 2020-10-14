@@ -1,3 +1,3 @@
 #!/bin/sh
 
-node core/core.js & node webUi/server/server.js
+node core/core.js & cd webUi/server && npm start
