@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Pill Notifier UI POC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      .led {
+        width: 32px;
+        height: 32px;
+        background: #c0c0c0;
+        border-radius: 50%;
+        margin-bottom: 16px;
+        animation: blink 500ms infinite;
+        animation-direction: alternate;
+      }
+
+      .led--on,
+      .led--off {
+        animation: none;
+      }
+
+      .led--on {
+        background-color: royalblue;
+      }
+
+      .led--off {
+        background-color: c0c0c0;
+      }
+
+      .records-container {
+        margin-top: 16px;
+      }
+
+      .record {
+        display: flex;
+        width: 300px;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      @keyframes blink {
+        from {
+          background-color: #c0c0c0;
+        }
+        to {
+          background-color: royalblue;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Pill Notifier UI POC</h3>
+    <div class="led"></div>
+    <button>Take a pill</button>
+    <div class="records-container"></div>
+    <script src="client.js"></script>
+  </body>
+</html>
