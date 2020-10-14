@@ -16,7 +16,7 @@ RUN npm install
 
 WORKDIR /home/pill_reminder_app
 
-COPY docker-entrypoint.sh .
+COPY dockerScripts/docker-entrypoint.sh .
 
 EXPOSE 3010
 EXPOSE 3011
