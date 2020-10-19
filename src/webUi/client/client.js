@@ -33,7 +33,7 @@ socket.addEventListener('message', function (event) {
         return `
         <div class="record">
             <div>${formattedTimestamp}</div>
-            <div>${record.description}</div>
+            <div>${record.notes}</div>
             <button data-timestamp="${record.timestamp}">Delete</div>
         </div>
     `;

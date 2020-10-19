@@ -1,45 +1,49 @@
-const fs = require('fs');
-const path = require('path');
+const Influx = require('influx');
 
-const FAKE_DB_FILENAME = path.resolve(__dirname, 'db.csv');
+const influxClient = new Influx.InfluxDB({
+  host: process.env.DB_ADDRESS,
+  database: 'pill_notifier_database',
+  schema: [
+    {
+      measurement: 'pill_takes',
+      fields: {
+        milligrams: Influx.FieldType.INTEGER,
+        notes: Influx.FieldType.STRING,
+      },
+      tags: ['pill_name'],
+    },
+  ],
+});
 
-function createPillTakeRecord() {
-  return new Promise((resolve) => {
-    const record = makeRecord();
-    const stringifiedRecord = JSON.stringify(record);
+console.log('[Core] Connected to InfluxDB at:', process.env.DB_ADDRESS);
 
-    fs.appendFile(FAKE_DB_FILENAME, `${stringifiedRecord},\n`, (error) => {
-      if (error) {
-        throw error;
-      }
-
-      resolve();
-    });
-  });
+function createPillTakeRecord(pillName, milligrams, notes = '') {
+  return influxClient.writePoints(
+    [
+      {
+        measurement: 'pill_takes',
+        fields: {
+          milligrams,
+          notes,
+        },
+        tags: { pill_name: pillName },
+      },
+    ],
+    { precision: 'ms' }
+  );
 }
 
 async function deleteRecord(timestamp) {
-  const records = await readRecords();
+  const timeFrom = millisecondTimestampToNanosecond(timestamp - 1);
+  const timeTo = millisecondTimestampToNanosecond(timestamp + 1);
 
-  const updatedRecords = records.filter((record) => record.timestamp !== timestamp);
+  const deleteRecordQuery = `DELETE FROM pill_takes WHERE time >= ${timeFrom} AND time <= ${timeTo}`;
 
-  await writeAllRecords(updatedRecords);
+  await influxClient.query(deleteRecordQuery, { precision: 'ms' });
+
+  const updatedRecords = await readRecords();
 
   return updatedRecords;
-}
-
-function writeAllRecords(records) {
-  let fileContent = records.map((record) => JSON.stringify(record)).join(',\n');
-
-  if (fileContent) {
-    fileContent += ',\n';
-  }
-
-  return new Promise((resolve) => {
-    fs.writeFile(FAKE_DB_FILENAME, fileContent, 'utf8', () => {
-      resolve();
-    });
-  });
 }
 
 async function checkIfPillTakenToday() {
@@ -55,19 +59,22 @@ async function checkIfPillTakenToday() {
   return isPillTakenToday;
 }
 
-function readRecords() {
-  return new Promise((resolve) => {
-    fs.readFile(FAKE_DB_FILENAME, 'utf8', (error, fileContent) => {
-      if (error) {
-        throw error;
-      }
+async function readRecords() {
+  try {
+    const rawRecords = await influxClient.query(`SELECT * FROM pill_takes`, { precision: 'ms' });
 
-      const fileContentWithoutLastComma = fileContent.trim().slice(0, -1);
-      const records = JSON.parse(`[${fileContentWithoutLastComma}]`);
+    const recordsWithUnixTimestamp = rawRecords.map((record) => ({
+      timestamp: record.time.getTime(),
+      pillName: record.pill_name,
+      milligrams: record.milligrams,
+      notes: record.notes,
+    }));
 
-      resolve(records);
-    });
-  });
+    return recordsWithUnixTimestamp;
+  } catch (error) {
+    console.error(`Failed to read records from the database`);
+    console.error(error);
+  }
 }
 
 function getDayStartTimestamp() {
@@ -79,11 +86,8 @@ function getDayStartTimestamp() {
   return date.getTime();
 }
 
-function makeRecord(description) {
-  return {
-    timestamp: Date.now(),
-    description: description || '',
-  };
+function millisecondTimestampToNanosecond(timestamp) {
+  return timestamp.toString() + '000000';
 }
 
 module.exports = {

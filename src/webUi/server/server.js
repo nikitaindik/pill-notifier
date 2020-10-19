@@ -43,14 +43,12 @@ mqttClient.on('message', (topic, message) => {
 });
 
 mqttClient.on('error', (error) => {
-  console.log("Can't connect to MQTT broker");
+  console.error('[Web UI server] MQTT error occurred');
   console.error(error);
 });
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
-    console.log('received: %s', message);
-
     const parsedMessage = JSON.parse(message);
 
     if (parsedMessage.type === 'buttonPush') {

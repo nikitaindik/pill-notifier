@@ -5,14 +5,14 @@ const ONE_HOUR = 1 * 60 * 60 * 1000;
 
 const mqttClient = enhancedMqtt.connect('Core');
 
-mqttClient.on('connect', function () {
+mqttClient.on('connect', () => {
   mqttClient.subscribe('client_connected');
   mqttClient.subscribe('request_records');
   mqttClient.subscribe('button_push');
   mqttClient.subscribe('delete_record');
 });
 
-mqttClient.on('message', async function (topic, message) {
+mqttClient.on('message', async (topic, message) => {
   if (topic === 'client_connected') {
     const isPillTakenToday = await storage.checkIfPillTakenToday();
 
@@ -26,7 +26,7 @@ mqttClient.on('message', async function (topic, message) {
   }
 
   if (topic === 'button_push') {
-    await storage.createPillTakeRecord();
+    await storage.createPillTakeRecord(process.env.PILL_NAME, 400);
     mqttClient.publish('pill_taken');
 
     const records = await storage.readRecords();

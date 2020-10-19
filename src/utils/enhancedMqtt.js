@@ -39,6 +39,20 @@ function connect(clientName) {
       return;
     }
 
+    if (args[0] === 'error') {
+      const [type, originalOnError, ...otherArgs] = args;
+
+      const enhancedOnError = (error) => {
+        console.error(
+          `[${clientName}] MQTT error! process.env.MQTT_BROKER_ADDRESS = ${process.env.MQTT_BROKER_ADDRESS}`
+        );
+
+        originalOnError(error);
+      };
+
+      originalClient.on(type, enhancedOnError, ...otherArgs);
+    }
+
     originalClient.on(...args);
   };
 

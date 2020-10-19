@@ -6,6 +6,10 @@ COPY src/core core
 COPY src/webUi webUi
 COPY src/utils utils
 
+WORKDIR /home/pill_reminder_app/core
+
+RUN npm install
+
 WORKDIR /home/pill_reminder_app/webUi/server
 
 RUN npm install
@@ -16,7 +20,7 @@ RUN npm install
 
 WORKDIR /home/pill_reminder_app
 
-COPY dockerScripts/docker-entrypoint.sh .
+COPY scripts/docker-entrypoint.sh .
 
 EXPOSE 3010
 EXPOSE 3011
