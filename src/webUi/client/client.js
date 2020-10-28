@@ -7,7 +7,7 @@ const socket = new WebSocket('ws://{{WEB_UI_SERVER_ADDRESS}}:3011');
 socket.addEventListener('message', function (event) {
   const parsedMessage = JSON.parse(event.data);
 
-  if (parsedMessage.type === 'isPillTakenToday') {
+  if (parsedMessage.type === 'is_pill_taken_today') {
     if (parsedMessage.payload) {
       ledElement.classList.add('led--off');
       ledElement.classList.remove('led--on');
@@ -17,7 +17,7 @@ socket.addEventListener('message', function (event) {
     }
   }
 
-  if (parsedMessage.type === 'pillTaken') {
+  if (parsedMessage.type === 'pill_taken') {
     ledElement.classList.add('led--off');
     ledElement.classList.remove('led--on');
   }
@@ -47,13 +47,13 @@ socket.addEventListener('message', function (event) {
 });
 
 buttonElement.addEventListener('click', () => {
-  socket.send(JSON.stringify({ type: 'buttonPush' }));
+  socket.send(JSON.stringify({ type: 'button_push' }));
 });
 
 recordsContainerElement.addEventListener('click', (event) => {
   const timestamp = event.target.dataset.timestamp;
 
   if (timestamp) {
-    socket.send(JSON.stringify({ type: 'deleteRecord', payload: timestamp }));
+    socket.send(JSON.stringify({ type: 'delete_record', payload: timestamp }));
   }
 });
