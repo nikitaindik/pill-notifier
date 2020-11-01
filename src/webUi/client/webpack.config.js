@@ -15,6 +15,7 @@ module.exports = {
         exclude: /node_modules/,
         use: 'svelte-loader',
       },
+      { test: /.m?js$/, type: 'javascript/auto', resolve: { fullySpecified: false } },
     ],
   },
   plugins: [new HtmlWebpackPlugin()],
