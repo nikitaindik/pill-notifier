@@ -9,6 +9,7 @@ mqttClient.on('connect', () => {
   mqttClient.subscribe('client_connected');
   mqttClient.subscribe('request_records');
   mqttClient.subscribe('button_push');
+  mqttClient.subscribe('update_record');
   mqttClient.subscribe('delete_record');
 });
 
@@ -17,29 +18,59 @@ mqttClient.on('message', async (topic, message) => {
     const isPillTakenToday = await storage.checkIfPillTakenToday();
 
     mqttClient.publish('is_pill_taken_today', isPillTakenToday);
+    return;
   }
 
   if (topic === 'request_records') {
     const records = await storage.readRecords();
 
-    mqttClient.publish('records', JSON.stringify(records));
+    mqttClient.publish('records', records);
+    return;
   }
 
   if (topic === 'button_push') {
-    await storage.createPillTakeRecord(process.env.PILL_NAME, 400);
+    await storage.createPillTakeRecord({
+      pillName: process.env.PILL_NAME,
+      milligrams: 400,
+    });
     mqttClient.publish('pill_taken');
 
     const records = await storage.readRecords();
-    mqttClient.publish('records', JSON.stringify(records));
+    mqttClient.publish('records', records);
+    return;
+  }
+
+  if (topic === 'update_record') {
+    const { originalTimestamp, updatedTimestamp, notes } = JSON.parse(message);
+
+    await storage.deleteRecord(originalTimestamp);
+
+    await storage.createPillTakeRecord({
+      timestamp: updatedTimestamp,
+      pillName: process.env.PILL_NAME,
+      milligrams: 400,
+      notes,
+    });
+
+    const records = await storage.readRecords();
+    mqttClient.publish('records', records);
+
+    const isPillTakenToday = await storage.checkIfPillTakenToday();
+    mqttClient.publish('is_pill_taken_today', isPillTakenToday);
+
+    return;
   }
 
   if (topic === 'delete_record') {
     const timestamp = Number(JSON.parse(message));
-    const records = await storage.deleteRecord(timestamp);
-    mqttClient.publish('records', JSON.stringify(records));
+    await storage.deleteRecord(timestamp);
+
+    const records = await storage.readRecords();
+    mqttClient.publish('records', records);
 
     const isPillTakenToday = await storage.checkIfPillTakenToday();
     mqttClient.publish('is_pill_taken_today', isPillTakenToday);
+    return;
   }
 });
 

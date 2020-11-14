@@ -28,7 +28,10 @@ async function createConnection(onMessage) {
     socket.send(stringified);
   }
 
-  function updateRecord(timestamp) {}
+  function updateRecord(record) {
+    const stringified = JSON.stringify({ type: 'update_record', payload: record });
+    socket.send(stringified);
+  }
 
   return {
     addRecord,

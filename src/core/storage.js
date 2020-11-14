@@ -17,20 +17,21 @@ const influxClient = new Influx.InfluxDB({
 
 console.log('[Core] Connected to InfluxDB at:', process.env.DB_ADDRESS);
 
-function createPillTakeRecord(pillName, milligrams, notes = '') {
-  return influxClient.writePoints(
-    [
-      {
-        measurement: 'pill_takes',
-        fields: {
-          milligrams,
-          notes,
-        },
-        tags: { pill_name: pillName },
-      },
-    ],
-    { precision: 'ms' }
-  );
+function createPillTakeRecord({ timestamp, pillName, milligrams, notes = '' }) {
+  const point = {
+    measurement: 'pill_takes',
+    fields: {
+      milligrams,
+      notes,
+    },
+    tags: { pill_name: pillName },
+  };
+
+  if (timestamp) {
+    point.timestamp = timestamp;
+  }
+
+  return influxClient.writePoints([point], { precision: 'ms' });
 }
 
 async function deleteRecord(timestamp) {
@@ -39,11 +40,7 @@ async function deleteRecord(timestamp) {
 
   const deleteRecordQuery = `DELETE FROM pill_takes WHERE time >= ${timeFrom} AND time <= ${timeTo}`;
 
-  await influxClient.query(deleteRecordQuery, { precision: 'ms' });
-
-  const updatedRecords = await readRecords();
-
-  return updatedRecords;
+  return influxClient.query(deleteRecordQuery, { precision: 'ms' });
 }
 
 async function checkIfPillTakenToday() {

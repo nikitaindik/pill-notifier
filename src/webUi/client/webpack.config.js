@@ -18,7 +18,11 @@ module.exports = {
       { test: /.m?js$/, type: 'javascript/auto', resolve: { fullySpecified: false } },
     ],
   },
-  plugins: [new HtmlWebpackPlugin()],
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Pill Notifier',
+    }),
+  ],
   resolve: {
     alias: {
       // Makes sure only one version of Svelte runtime is bundled
@@ -27,4 +31,5 @@ module.exports = {
     extensions: ['.mjs', '.js', '.svelte'],
     mainFields: ['svelte', 'browser', 'module', 'main'],
   },
+  devtool: 'inline-source-map',
 };

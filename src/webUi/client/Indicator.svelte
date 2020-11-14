@@ -3,14 +3,13 @@
 </script>
 
 <style>
-  .indicator {
-    margin-top: 40px;
-    /* margin-left: 100px; */
+  .Indicator {
     width: 20px;
     height: 20px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 1);
     transition: box-shadow 200ms ease-in, opacity 200ms ease-in;
+    transform: scale(1.5);
   }
 
   .on {
@@ -37,4 +36,4 @@
   }
 </style>
 
-<div class="indicator {status}" />
+<div class="Indicator {status}" />

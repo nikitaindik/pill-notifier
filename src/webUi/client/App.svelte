@@ -1,7 +1,10 @@
 <script>
   import { onMount } from 'svelte';
   import createConnection from './connection';
+
+  import Container from './Container.svelte';
   import Indicator from './Indicator.svelte';
+  import PillButton from './PillButton.svelte';
   import RecordList from './RecordList.svelte';
 
   let connection = null;
@@ -20,7 +23,7 @@
     }
 
     if (type === 'records') {
-      records = JSON.parse(payload);
+      records = payload;
       return;
     }
   }
@@ -37,8 +40,25 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
       'Helvetica Neue', sans-serif;
   }
+
+  .header-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 32px;
+  }
+
+  .record-list-wrapper {
+    margin-top: 32px;
+  }
 </style>
 
-<Indicator {status} />
-<button on:click={connection.addRecord} disabled={!connection}>Button</button>
-<RecordList {records} deleteRecord={connection?.deleteRecord} />
+<Container>
+  <div class="header-wrapper">
+    <Indicator {status} />
+    <PillButton onClick={connection?.addRecord} disabled={!connection}>TAKE A PILL</PillButton>
+  </div>
+  <div class="record-list-wrapper">
+    <RecordList {records} updateRecord={connection?.updateRecord} deleteRecord={connection?.deleteRecord} />
+  </div>
+</Container>

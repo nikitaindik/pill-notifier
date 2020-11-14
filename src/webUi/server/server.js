@@ -56,6 +56,10 @@ wsServer.on('connection', (socket) => {
     if (parsedMessage.type === 'delete_record') {
       mqttClient.publish('delete_record', parsedMessage.payload);
     }
+
+    if (parsedMessage.type === 'update_record') {
+      mqttClient.publish('update_record', parsedMessage.payload);
+    }
   });
 
   mqttClient.publish('client_connected');

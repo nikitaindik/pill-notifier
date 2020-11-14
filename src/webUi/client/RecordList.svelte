@@ -1,18 +1,38 @@
 <script>
   import Record from './Record.svelte';
 
+  export let updateRecord;
   export let deleteRecord;
   export let records = [];
+
+  let recordBeingEditedTimestamp = null;
+
+  function setRecordBeingEditedTimestamp(timestamp) {
+    recordBeingEditedTimestamp = timestamp;
+  }
 </script>
 
-<style>
-  .record-list {
-    width: 500px;
-  }
-</style>
-
-<div class="record-list">
+<div>
   {#each records as record (record.timestamp)}
-    <Record timestamp={record.timestamp} onDeleteClick={() => deleteRecord(record.timestamp)} />
+    <Record
+      timestamp={record.timestamp}
+      notes={record.notes}
+      mode={recordBeingEditedTimestamp === record.timestamp ? 'edit' : 'view'}
+      onEditClick={() => {
+        setRecordBeingEditedTimestamp(record.timestamp);
+      }}
+      onDeleteClick={() => {
+        deleteRecord(record.timestamp);
+      }}
+      onCancelClick={() => {
+        setRecordBeingEditedTimestamp(null);
+      }}
+      onConfirm={(record, hasChanged) => {
+        setRecordBeingEditedTimestamp(null);
+
+        if (hasChanged) {
+          updateRecord(record);
+        }
+      }} />
   {/each}
 </div>
