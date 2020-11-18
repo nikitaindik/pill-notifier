@@ -21,6 +21,19 @@
 
   let inputNotes = notes;
 
+  let isDeletePressedOnce = false;
+
+  const defaultIconColor = 'palevioletred';
+  const dangerIconColor = 'tomato';
+
+  function onDeleteClickGuarded() {
+    if (isDeletePressedOnce) {
+      onDeleteClick();
+    } else {
+      isDeletePressedOnce = true;
+    }
+  }
+
   function handleConfirm() {
     const minutePrecisionTimestampInitial = getMinutePrecisionTimestamp(timestamp);
     const minutePrecisionTimestampCurrent = new Date(inputTimestamp).getTime();
@@ -50,9 +63,15 @@
 
 <style>
   .Record {
-    display: flex;
-    height: 40px;
     padding: 0 10px;
+  }
+
+  .Record:not(:first-of-type) {
+    margin-top: 24px;
+  }
+
+  .Record > div + div {
+    margin: 8px 0 0 0;
   }
 
   .Record--view {
@@ -63,10 +82,6 @@
     color: powderblue;
   }
 
-  .Record > div + div {
-    margin-left: 8px;
-  }
-
   .date-container,
   .notes-container,
   .actions-container {
@@ -74,16 +89,35 @@
     align-items: center;
   }
 
+  .actions-container {
+    justify-content: space-evenly;
+  }
+
   .notes-container {
     flex: 1;
   }
 
-  .actions-container {
-    display: flex;
-  }
-
   .action + .action {
     margin-left: 8px;
+  }
+
+  @media (min-width: 768px) {
+    .Record {
+      display: flex;
+      height: 40px;
+    }
+
+    .Record:not(:first-of-type) {
+      margin-top: 0;
+    }
+
+    .Record > div + div {
+      margin: 0 0 0 8px;
+    }
+
+    .actions-container {
+      justify-content: center;
+    }
   }
 </style>
 
@@ -98,17 +132,17 @@
     <div class="actions-container">
       <div class="action">
         <IconButton onClick={handleConfirm}>
-          <ConfirmIcon size={20} />
+          <ConfirmIcon size={20} fill={defaultIconColor} />
         </IconButton>
       </div>
       <div class="action">
         <IconButton onClick={onCancelClick}>
-          <CloseIcon size={16} />
+          <CloseIcon size={16} fill={defaultIconColor} />
         </IconButton>
       </div>
       <div class="action">
-        <IconButton onClick={onDeleteClick}>
-          <DeleteIcon size={16} />
+        <IconButton onClick={onDeleteClickGuarded}>
+          <DeleteIcon fill={isDeletePressedOnce ? dangerIconColor : defaultIconColor} size={16} />
         </IconButton>
       </div>
     </div>

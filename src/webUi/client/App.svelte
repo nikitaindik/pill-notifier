@@ -23,7 +23,8 @@
     }
 
     if (type === 'records') {
-      records = payload;
+      const payloadClone = [...payload];
+      records = payloadClone.reverse();
       return;
     }
   }
