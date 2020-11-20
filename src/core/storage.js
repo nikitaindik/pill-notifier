@@ -17,7 +17,7 @@ const influxClient = new Influx.InfluxDB({
 
 console.log('[Core] Connected to InfluxDB at:', process.env.DB_ADDRESS);
 
-function createPillTakeRecord({ timestamp, pillName, milligrams, notes = '' }) {
+function createPillTakeRecord({ timestamp, pillName, milligrams, notes }) {
   const point = {
     measurement: 'pill_takes',
     fields: {

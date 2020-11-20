@@ -13,6 +13,10 @@
     font-size: 0;
     cursor: pointer;
   }
+
+  button:hover {
+    filter: brightness(1.5);
+  }
 </style>
 
 <button on:click={onClick}><slot /></button>

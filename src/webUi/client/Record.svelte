@@ -5,26 +5,59 @@
   import IconButton from './IconButton.svelte';
   import Input from './Input.svelte';
 
+  const defaultIconColor = 'cadetblue';
+  const dangerIconColor = 'tomato';
+
   export let mode = 'view';
+  export let isSelectable = true;
   export let timestamp;
   export let notes;
   export let onEditClick;
   export let onDeleteClick;
-  export let onCancelClick;
+  export let onCancel;
   export let onConfirm;
 
   let date = new Date(timestamp);
-  let formattedTimestamp = `${date.toLocaleDateString('ru')} ${date.toLocaleTimeString('ru')}`;
+  let timestampForView = `${date.toLocaleDateString('ru')} ${date.toLocaleTimeString('ru')}`;
 
   const utcOffset = date.getTimezoneOffset() * 60 * 1000;
-  let inputTimestamp = new Date(date.getTime() + Math.abs(utcOffset)).toISOString().slice(0, 16);
+  let timestampForEdit = new Date(date.getTime() + Math.abs(utcOffset)).toISOString().slice(0, 16);
 
-  let inputNotes = notes;
+  let notesForEdit = notes;
 
   let isDeletePressedOnce = false;
 
-  const defaultIconColor = 'palevioletred';
-  const dangerIconColor = 'tomato';
+  let previousMode;
+  let recordElement = null;
+
+  $: {
+    const modeChangedToEdit = previousMode === 'view' && mode === 'edit';
+    const modeChangedToView = previousMode === 'edit' && mode === 'view';
+
+    if (modeChangedToEdit) {
+      document.addEventListener('click', subscribeToClicksOutside);
+    }
+
+    if (modeChangedToView) {
+      document.removeEventListener('click', subscribeToClicksOutside);
+    }
+
+    previousMode = mode;
+  }
+
+  function subscribeToClicksOutside(event) {
+    const hasClickedOutside = !recordElement.contains(event.target);
+
+    if (hasClickedOutside) {
+      onCancel();
+      isDeletePressedOnce = false;
+    }
+  }
+
+  function onEditClickWithStopPropagation(event) {
+    event.stopPropagation();
+    onEditClick(event);
+  }
 
   function onDeleteClickGuarded() {
     if (isDeletePressedOnce) {
@@ -36,17 +69,17 @@
 
   function handleConfirm() {
     const minutePrecisionTimestampInitial = getMinutePrecisionTimestamp(timestamp);
-    const minutePrecisionTimestampCurrent = new Date(inputTimestamp).getTime();
+    const minutePrecisionTimestampCurrent = new Date(timestampForEdit).getTime();
 
     const hasTimeChanged = minutePrecisionTimestampCurrent !== minutePrecisionTimestampInitial;
-    const hasNotesChanged = inputNotes !== notes;
+    const hasNotesChanged = notesForEdit !== notes;
     const hasChanged = hasTimeChanged || hasNotesChanged;
 
     onConfirm(
       {
         originalTimestamp: timestamp,
         updatedTimestamp: hasTimeChanged ? minutePrecisionTimestampCurrent : timestamp,
-        notes: inputNotes,
+        notes: notesForEdit,
       },
       hasChanged
     );
@@ -64,6 +97,7 @@
 <style>
   .Record {
     padding: 0 10px;
+    border: 1px solid transparent;
   }
 
   .Record:not(:first-of-type) {
@@ -75,11 +109,18 @@
   }
 
   .Record--view {
-    cursor: pointer;
+    color: #b2b2b2;
+    border-radius: 22px;
   }
 
-  .Record--view:hover {
-    color: powderblue;
+  .Record--view:hover.isSelectable {
+    cursor: pointer;
+    color: #fff;
+    border-color: #b2b2b2;
+  }
+
+  .Record--view:not(.isSelectable) {
+    pointer-events: none;
   }
 
   .date-container,
@@ -122,12 +163,12 @@
 </style>
 
 {#if mode === 'edit'}
-  <div class="Record">
+  <div class="Record" bind:this={recordElement}>
     <div class="date-container">
-      <Input type="datetime-local" bind:value={inputTimestamp} />
+      <Input type="datetime-local" bind:value={timestampForEdit} />
     </div>
     <div class="notes-container">
-      <Input bind:value={inputNotes} />
+      <Input bind:value={notesForEdit} onChange={handleConfirm} />
     </div>
     <div class="actions-container">
       <div class="action">
@@ -136,7 +177,7 @@
         </IconButton>
       </div>
       <div class="action">
-        <IconButton onClick={onCancelClick}>
+        <IconButton onClick={onCancel}>
           <CloseIcon size={16} fill={defaultIconColor} />
         </IconButton>
       </div>
@@ -148,8 +189,8 @@
     </div>
   </div>
 {:else}
-  <div class="Record Record--view" on:click={onEditClick}>
-    <div class="date-container">{formattedTimestamp}</div>
+  <div class="Record Record--view" class:isSelectable on:click={onEditClickWithStopPropagation}>
+    <div class="date-container">{timestampForView}</div>
     <div class="notes-container">{notes}</div>
   </div>
 {/if}

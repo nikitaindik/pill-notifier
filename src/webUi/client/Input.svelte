@@ -1,6 +1,7 @@
 <script>
   export let value;
   export let type = 'text';
+  export let onChange;
 </script>
 
 <style>
@@ -22,7 +23,7 @@
     filter: invert(1);
     outline: none;
     cursor: pointer;
-    right: 5px;
+    right: 6px;
     position: absolute;
   }
 </style>
@@ -32,4 +33,5 @@
   {value}
   on:change={(event) => {
     value = event.target.value;
+    onChange(event);
   }} />

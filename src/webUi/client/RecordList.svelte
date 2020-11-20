@@ -18,13 +18,15 @@
       timestamp={record.timestamp}
       notes={record.notes}
       mode={recordBeingEditedTimestamp === record.timestamp ? 'edit' : 'view'}
+      isSelectable={recordBeingEditedTimestamp === null}
       onEditClick={() => {
         setRecordBeingEditedTimestamp(record.timestamp);
       }}
       onDeleteClick={() => {
+        setRecordBeingEditedTimestamp(null);
         deleteRecord(record.timestamp);
       }}
-      onCancelClick={() => {
+      onCancel={() => {
         setRecordBeingEditedTimestamp(null);
       }}
       onConfirm={(record, hasChanged) => {

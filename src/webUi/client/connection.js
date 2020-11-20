@@ -29,7 +29,12 @@ async function createConnection(onMessage) {
   }
 
   function updateRecord(record) {
-    const stringified = JSON.stringify({ type: 'update_record', payload: record });
+    const formattedRecord = {
+      ...record,
+      notes: record.notes || null,
+    };
+
+    const stringified = JSON.stringify({ type: 'update_record', payload: formattedRecord });
     socket.send(stringified);
   }
 

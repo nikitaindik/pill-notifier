@@ -24,7 +24,10 @@
 
     if (type === 'records') {
       const payloadClone = [...payload];
-      records = payloadClone.reverse();
+      records = payloadClone.reverse().map((record) => ({
+        ...record,
+        notes: record.notes || '',
+      }));
       return;
     }
   }
