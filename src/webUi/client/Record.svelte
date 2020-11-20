@@ -97,7 +97,7 @@
 <style>
   .Record {
     padding: 0 10px;
-    border: 1px solid transparent;
+    border-radius: 6px;
   }
 
   .Record:not(:first-of-type) {
@@ -110,13 +110,12 @@
 
   .Record--view {
     color: #b2b2b2;
-    border-radius: 22px;
   }
 
   .Record--view:hover.isSelectable {
     cursor: pointer;
     color: #fff;
-    border-color: #b2b2b2;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   .Record--view:not(.isSelectable) {
