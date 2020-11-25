@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build -t pills-image ..
+docker build -t pill-notifier ..
