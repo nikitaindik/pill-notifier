@@ -12,6 +12,13 @@ const influxClient = new Influx.InfluxDB({
       },
       tags: ['pill_name'],
     },
+    {
+      measurement: 'pills_left',
+      fields: {
+        count: Influx.FieldType.INTEGER,
+      },
+      tags: ['pill_name'],
+    },
   ],
 });
 
@@ -74,6 +81,64 @@ async function readRecords() {
   }
 }
 
+async function readPillsLeft() {
+  try {
+    const pillsLeftList = await influxClient.query(`SELECT * FROM pills_left`);
+
+    return pillsLeftList.reduce(
+      (pillsLeft, pill) => ({
+        ...pillsLeft,
+        [pill.pill_name]: pill.count,
+      }),
+      {}
+    );
+  } catch (error) {
+    console.error(`Failed to read "pills left" from the database`);
+    console.error(error);
+  }
+}
+
+async function updatePillsLeft(pillName, change) {
+  const pillsLeftForAllPills = await readPillsLeft();
+  const count = pillsLeftForAllPills[pillName];
+
+  await deletePillsLeft(pillName);
+
+  await createPillsLeft(pillName, count + change);
+}
+
+async function decreasePillsLeft(pillName) {
+  await updatePillsLeft(pillName, -1);
+}
+
+async function increasePillsLeft(pillName) {
+  await updatePillsLeft(pillName, 1);
+}
+
+async function createPillsLeft(pillName, count) {
+  try {
+    const point = {
+      measurement: 'pills_left',
+      fields: {
+        count,
+      },
+      tags: { pill_name: pillName },
+      timestamp: 1,
+    };
+
+    return influxClient.writePoints([point]);
+  } catch (error) {
+    console.error('Database error. Failed to create a "pills left" record');
+    console.error(error);
+  }
+}
+
+async function deletePillsLeft(pillName) {
+  const deletePillsLeftQuery = `DROP SERIES FROM pills_left WHERE pill_name='${pillName}'`;
+
+  await influxClient.query(deletePillsLeftQuery);
+}
+
 function getDayStartTimestamp() {
   const date = new Date();
   date.setSeconds(0);
@@ -92,4 +157,7 @@ module.exports = {
   deleteRecord,
   createPillTakeRecord,
   checkIfPillTakenToday,
+  readPillsLeft,
+  decreasePillsLeft,
+  increasePillsLeft,
 };

@@ -5,10 +5,12 @@
   import Container from './Container.svelte';
   import Indicator from './Indicator.svelte';
   import PillButton from './PillButton.svelte';
+  import PillsLeft from './PillsLeft.svelte';
   import RecordList from './RecordList.svelte';
 
   let connection = null;
   let status = 'blinking';
+  let pillsLeft = null;
   let records = [];
 
   function handleMessage({ type, payload }) {
@@ -28,6 +30,11 @@
         ...record,
         notes: record.notes || '',
       }));
+      return;
+    }
+
+    if (type === 'pills_left') {
+      pillsLeft = payload.acyclovir;
       return;
     }
   }
@@ -61,6 +68,7 @@
   <div class="header-wrapper">
     <Indicator {status} />
     <PillButton onClick={connection?.addRecord} disabled={!connection}>TAKE A PILL</PillButton>
+    <PillsLeft {pillsLeft} />
   </div>
   <div class="record-list-wrapper">
     <RecordList {records} updateRecord={connection?.updateRecord} deleteRecord={connection?.deleteRecord} />

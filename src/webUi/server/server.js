@@ -15,6 +15,7 @@ const wsServer = new WebSocket.Server({ port: WS_PORT }, () => {
 mqttClient.on('connect', () => {
   mqttClient.subscribe('is_pill_taken_today');
   mqttClient.subscribe('records');
+  mqttClient.subscribe('pills_left');
   mqttClient.subscribe('pill_taken');
 });
 
@@ -30,6 +31,12 @@ mqttClient.on('message', (topic, message) => {
   if (topic === 'records') {
     wsServer.clients.forEach((socket) => {
       socket.send(JSON.stringify({ type: 'records', payload: JSON.parse(message) }));
+    });
+  }
+
+  if (topic === 'pills_left') {
+    wsServer.clients.forEach((socket) => {
+      socket.send(JSON.stringify({ type: 'pills_left', payload: JSON.parse(message) }));
     });
   }
 

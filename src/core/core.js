@@ -23,8 +23,10 @@ mqttClient.on('message', async (topic, message) => {
 
   if (topic === 'request_records') {
     const records = await storage.readRecords();
-
     mqttClient.publish('records', records);
+
+    const pillsLeft = await storage.readPillsLeft();
+    mqttClient.publish('pills_left', pillsLeft);
     return;
   }
 
@@ -37,6 +39,11 @@ mqttClient.on('message', async (topic, message) => {
 
     const records = await storage.readRecords();
     mqttClient.publish('records', records);
+
+    await storage.decreasePillsLeft(process.env.PILL_NAME);
+
+    const pillsLeft = await storage.readPillsLeft();
+    mqttClient.publish('pills_left', pillsLeft);
     return;
   }
 
@@ -70,6 +77,11 @@ mqttClient.on('message', async (topic, message) => {
 
     const isPillTakenToday = await storage.checkIfPillTakenToday();
     mqttClient.publish('is_pill_taken_today', isPillTakenToday);
+
+    await storage.increasePillsLeft(process.env.PILL_NAME);
+
+    const pillsLeft = await storage.readPillsLeft();
+    mqttClient.publish('pills_left', pillsLeft);
     return;
   }
 });
