@@ -1,11 +1,10 @@
 <script>
+  export let size = 30;
   export let onClick;
 </script>
 
 <style>
   button {
-    width: 30px;
-    height: 30px;
     border: none;
     outline: none;
     background: transparent;
@@ -19,4 +18,4 @@
   }
 </style>
 
-<button on:click={onClick}><slot /></button>
+<button on:click={onClick} style={`width: ${size}px; height: ${size}px;`}><slot /></button>

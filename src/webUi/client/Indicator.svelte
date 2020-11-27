@@ -4,6 +4,8 @@
 
 <style>
   .Indicator {
+    position: relative;
+    z-index: 1;
     width: 20px;
     height: 20px;
     border-radius: 50%;

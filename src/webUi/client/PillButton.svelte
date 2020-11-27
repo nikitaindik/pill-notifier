@@ -15,7 +15,6 @@
     font-weight: 600;
     color: #fff;
     cursor: pointer;
-    margin: 20px;
     height: 55px;
     text-align: center;
     border: none;

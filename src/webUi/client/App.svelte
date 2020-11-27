@@ -62,13 +62,19 @@
   .record-list-wrapper {
     margin-top: 32px;
   }
+
+  .pill-button-wrapper {
+    margin-top: 16px;
+  }
 </style>
 
 <Container>
   <div class="header-wrapper">
     <Indicator {status} />
-    <PillButton onClick={connection?.addRecord} disabled={!connection}>TAKE A PILL</PillButton>
-    <PillsLeft {pillsLeft} />
+    <div class="pill-button-wrapper">
+      <PillButton onClick={connection?.addRecord} disabled={!connection}>TAKE A PILL</PillButton>
+    </div>
+    <PillsLeft onConfirm={connection?.updatePillsLeft} {pillsLeft} />
   </div>
   <div class="record-list-wrapper">
     <RecordList {records} updateRecord={connection?.updateRecord} deleteRecord={connection?.deleteRecord} />

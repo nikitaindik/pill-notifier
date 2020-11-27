@@ -38,10 +38,16 @@ async function createConnection(onMessage) {
     socket.send(stringified);
   }
 
+  function updatePillsLeft(count) {
+    const stringified = JSON.stringify({ type: 'update_pills_left', payload: count });
+    socket.send(stringified);
+  }
+
   return {
     addRecord,
     deleteRecord,
     updateRecord,
+    updatePillsLeft,
   };
 }
 

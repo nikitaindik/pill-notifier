@@ -2,6 +2,7 @@
   export let value;
   export let type = 'text';
   export let onChange;
+  export let style;
 </script>
 
 <style>
@@ -31,7 +32,11 @@
 <input
   {type}
   {value}
+  {style}
   on:change={(event) => {
     value = event.target.value;
-    onChange(event);
+
+    if (onChange) {
+      onChange(event);
+    }
   }} />

@@ -11,6 +11,7 @@ mqttClient.on('connect', () => {
   mqttClient.subscribe('button_push');
   mqttClient.subscribe('update_record');
   mqttClient.subscribe('delete_record');
+  mqttClient.subscribe('update_pills_left');
 });
 
 mqttClient.on('message', async (topic, message) => {
@@ -79,6 +80,14 @@ mqttClient.on('message', async (topic, message) => {
     mqttClient.publish('is_pill_taken_today', isPillTakenToday);
 
     await storage.increasePillsLeft(process.env.PILL_NAME);
+
+    const pillsLeft = await storage.readPillsLeft();
+    mqttClient.publish('pills_left', pillsLeft);
+    return;
+  }
+
+  if (topic === 'update_pills_left') {
+    await storage.setPillsLeft(process.env.PILL_NAME, Number(JSON.parse(message)));
 
     const pillsLeft = await storage.readPillsLeft();
     mqttClient.publish('pills_left', pillsLeft);

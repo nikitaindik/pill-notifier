@@ -67,6 +67,10 @@ wsServer.on('connection', (socket) => {
     if (parsedMessage.type === 'update_record') {
       mqttClient.publish('update_record', parsedMessage.payload);
     }
+
+    if (parsedMessage.type === 'update_pills_left') {
+      mqttClient.publish('update_pills_left', parsedMessage.payload);
+    }
   });
 
   mqttClient.publish('client_connected');

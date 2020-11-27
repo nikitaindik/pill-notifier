@@ -102,9 +102,12 @@ async function updatePillsLeft(pillName, change) {
   const pillsLeftForAllPills = await readPillsLeft();
   const count = pillsLeftForAllPills[pillName];
 
-  await deletePillsLeft(pillName);
+  await setPillsLeft(pillName, count + change);
+}
 
-  await createPillsLeft(pillName, count + change);
+async function setPillsLeft(pillName, count) {
+  await deletePillsLeft(pillName);
+  await createPillsLeft(pillName, count);
 }
 
 async function decreasePillsLeft(pillName) {
@@ -160,4 +163,5 @@ module.exports = {
   readPillsLeft,
   decreasePillsLeft,
   increasePillsLeft,
+  setPillsLeft,
 };
