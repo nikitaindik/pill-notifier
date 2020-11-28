@@ -129,6 +129,15 @@
     align-items: center;
   }
 
+  .date-container,
+  .notes-container {
+    justify-content: center;
+  }
+
+  .notes-container {
+    text-align: center;
+  }
+
   .actions-container {
     justify-content: space-evenly;
   }
@@ -153,6 +162,15 @@
 
     .Record > div + div {
       margin: 0 0 0 8px;
+    }
+
+    .date-container,
+    .notes-container {
+      justify-content: flex-start;
+    }
+
+    .notes-container {
+      text-align: left;
     }
 
     .actions-container {
