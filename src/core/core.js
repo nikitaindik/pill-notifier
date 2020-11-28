@@ -1,7 +1,10 @@
 const storage = require('./storage');
+const makeQueue = require('./queue');
 const enhancedMqtt = require('../utils/enhancedMqtt');
 
 const ONE_HOUR = 1 * 60 * 60 * 1000;
+
+const queue = makeQueue();
 
 const mqttClient = enhancedMqtt.connect('Core');
 
@@ -32,66 +35,76 @@ mqttClient.on('message', async (topic, message) => {
   }
 
   if (topic === 'button_push') {
-    await storage.createPillTakeRecord({
-      pillName: process.env.PILL_NAME,
-      milligrams: 400,
+    queue.addItem(async () => {
+      const timestamp = Date.now();
+
+      await storage.createPillTakeRecord({
+        pillName: process.env.PILL_NAME,
+        milligrams: 400,
+      });
+      mqttClient.publish('pill_taken');
+
+      const records = await storage.readRecords();
+      mqttClient.publish('records', records);
+
+      await storage.decreasePillsLeft(process.env.PILL_NAME);
+
+      const pillsLeft = await storage.readPillsLeft();
+      mqttClient.publish('pills_left', pillsLeft);
+      return;
     });
-    mqttClient.publish('pill_taken');
-
-    const records = await storage.readRecords();
-    mqttClient.publish('records', records);
-
-    await storage.decreasePillsLeft(process.env.PILL_NAME);
-
-    const pillsLeft = await storage.readPillsLeft();
-    mqttClient.publish('pills_left', pillsLeft);
-    return;
   }
 
   if (topic === 'update_record') {
-    const { originalTimestamp, updatedTimestamp, notes } = JSON.parse(message);
+    queue.addItem(async () => {
+      const { originalTimestamp, updatedTimestamp, notes } = JSON.parse(message);
 
-    await storage.deleteRecord(originalTimestamp);
+      await storage.deleteRecord(originalTimestamp);
 
-    await storage.createPillTakeRecord({
-      timestamp: updatedTimestamp,
-      pillName: process.env.PILL_NAME,
-      milligrams: 400,
-      notes,
+      await storage.createPillTakeRecord({
+        timestamp: updatedTimestamp,
+        pillName: process.env.PILL_NAME,
+        milligrams: 400,
+        notes,
+      });
+
+      const records = await storage.readRecords();
+      mqttClient.publish('records', records);
+
+      const isPillTakenToday = await storage.checkIfPillTakenToday();
+      mqttClient.publish('is_pill_taken_today', isPillTakenToday);
+
+      return;
     });
-
-    const records = await storage.readRecords();
-    mqttClient.publish('records', records);
-
-    const isPillTakenToday = await storage.checkIfPillTakenToday();
-    mqttClient.publish('is_pill_taken_today', isPillTakenToday);
-
-    return;
   }
 
   if (topic === 'delete_record') {
-    const timestamp = Number(JSON.parse(message));
-    await storage.deleteRecord(timestamp);
+    queue.addItem(async () => {
+      const timestamp = Number(JSON.parse(message));
+      await storage.deleteRecord(timestamp);
 
-    const records = await storage.readRecords();
-    mqttClient.publish('records', records);
+      const records = await storage.readRecords();
+      mqttClient.publish('records', records);
 
-    const isPillTakenToday = await storage.checkIfPillTakenToday();
-    mqttClient.publish('is_pill_taken_today', isPillTakenToday);
+      const isPillTakenToday = await storage.checkIfPillTakenToday();
+      mqttClient.publish('is_pill_taken_today', isPillTakenToday);
 
-    await storage.increasePillsLeft(process.env.PILL_NAME);
+      await storage.increasePillsLeft(process.env.PILL_NAME);
 
-    const pillsLeft = await storage.readPillsLeft();
-    mqttClient.publish('pills_left', pillsLeft);
-    return;
+      const pillsLeft = await storage.readPillsLeft();
+      mqttClient.publish('pills_left', pillsLeft);
+      return;
+    });
   }
 
   if (topic === 'update_pills_left') {
-    await storage.setPillsLeft(process.env.PILL_NAME, Number(JSON.parse(message)));
+    queue.addItem(async () => {
+      await storage.setPillsLeft(process.env.PILL_NAME, Number(JSON.parse(message)));
 
-    const pillsLeft = await storage.readPillsLeft();
-    mqttClient.publish('pills_left', pillsLeft);
-    return;
+      const pillsLeft = await storage.readPillsLeft();
+      mqttClient.publish('pills_left', pillsLeft);
+      return;
+    });
   }
 });
 

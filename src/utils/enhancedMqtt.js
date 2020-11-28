@@ -9,7 +9,10 @@ function connect(clientName) {
 
   enhancedClient.publish = (topic, message) => {
     const stringifiedMessage = JSON.stringify(message);
-    originalClient.publish(topic, stringifiedMessage, console.log(`[${clientName}] MQTT publish:`, { topic, message }));
+
+    originalClient.publish(topic, stringifiedMessage, () => {
+      console.log(`[${clientName}] MQTT publish:`, { topic, message });
+    });
   };
 
   enhancedClient.on = (...args) => {
